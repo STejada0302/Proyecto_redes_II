@@ -1,7 +1,3 @@
-// ControlesMoviles.js
-// v3 – soporta múltiples toques simultáneos (p.ej. UP + LEFT) manteniendo el mismo
-// comportamiento que las teclas físicas. Cada botón lleva su propio Set de punteros
-// activos para no desactivar la dirección mientras otro dedo sigue presionando.
 
 export default class ControlesMoviles {
     constructor(scene, player) {

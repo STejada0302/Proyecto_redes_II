@@ -1,5 +1,5 @@
 export default class PremioTiempo extends Phaser.Physics.Arcade.Sprite {
-    constructor(escena, x, y, textura = 'balon') {
+    constructor(escena, x, y, textura = 'reloj') {
       super(escena, x, y, textura);
   
       this.escena = escena;

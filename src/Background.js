@@ -9,39 +9,69 @@ export default class Fondo {
 
     // Cargamos recursos de imágenes
     preCargar() {
-        this.escena.load.image('fondo1', './assets/fondoN.png');
+        this.escena.load.image('fondo1', './assets/fondobueno.jpeg');
         this.escena.load.image('suelo1', './assets/suelo1.png');
     }
 
     // Aquí se crean los sprites y cuerpos físicos
-    crear() {
-        // Fondo infinito para que se vea "desplazándose"
+    crear () {
+        const altoPantalla  = this.escena.scale.height;
+        const anchoPantalla = this.escena.scale.width;
+    
+        // 1. Medir la imagen original
+        const texturaFondo  = this.escena.textures.get('fondo1').getSourceImage();
+        const factorEscala  = altoPantalla / texturaFondo.height;   // ajusta solo a la altura
+    
+        // 2. Área que se va a cubrir (puede ser tan ancha como la cámara)
         this.imagenFondo = this.escena.add.tileSprite(
-            0,
-            0,
-            4000,
-            this.escena.scale.height,
+            0, 0,
+            anchoPantalla,     // rectángulo a cubrir
+            altoPantalla,
             'fondo1'
-        ).setOrigin(0, 0);
-        this.imagenFondo.setScrollFactor(0);
+        )
+        .setOrigin(0, 0)
+        .setScrollFactor(0);
+    
+        // 3. Escalar la textura sin distorsionarla
+        this.imagenFondo.tileScaleX = factorEscala;   // mantiene proporción
+        this.imagenFondo.tileScaleY = factorEscala;   // encaja exactamente la altura
+    /*-------------------------------------------------------------------------------------
 
-        // Suelo también como un tileSprite
+        /* --- suelo --- */
+    
+        /* ---------- 1. Medir la textura del suelo ---------- */
+        const texSuelo    = this.escena.textures.get('suelo1').getSourceImage();
+    
+        /* ---------- 2. Elegir cómo quieres “dimensionar” ---------- */
+        // Opción A) Que el suelo ocupe SIEMPRE cierto % de la altura visible
+        const FACTOR_ALTURA = 0.12;              // ← 12 % de la pantalla
+        const altoSuelo     = altoPantalla * FACTOR_ALTURA;
+        const scaleSuelo    = altoSuelo / texSuelo.height;
+    
+        // Opción B) Mantener la altura original y escalar solo para cubrir el ancho
+        // const scaleSuelo = anchoPantalla / texSuelo.width;
+        // const altoSuelo  = texSuelo.height * scaleSuelo;
+    
+        /* ---------- 3. Crear el tileSprite ---------- */
         this.suelo = this.escena.add.tileSprite(
             0,
-            this.escena.scale.height - 70,
-            4000,
-            70,
+            altoPantalla - altoSuelo,   // pegado abajo
+            anchoPantalla,              // se amplía solo horizontalmente
+            altoSuelo,
             'suelo1'
-        ).setOrigin(0, 0);
-        this.suelo.setScrollFactor(0);
-
-        // Convertimos el sprite del suelo a un cuerpo estático de Phaser
+        )
+        .setOrigin(0)
+        .setScrollFactor(0);
+    
+        // Escalar el patrón; esto mantiene la textura nítida
+        this.suelo.tileScaleX = scaleSuelo;
+        this.suelo.tileScaleY = scaleSuelo;
+    
+        /* ---------- 4. Cuerpo físico ---------- */
         this.escena.physics.add.existing(this.suelo, true);
         this.cuerpoSuelo = this.suelo.body;
-        // Ajustamos tamaño y posición del colisionador
-        this.cuerpoSuelo.setSize(999999, 70);
-        this.cuerpoSuelo.setOffset(0, 0);
-    }
+        this.cuerpoSuelo.setSize(Number.MAX_SAFE_INTEGER, altoSuelo);
+        }
 
     // Se llama en cada frame para actualizar la posición de fondo y suelo
     actualizar(desplazamientoX) {
